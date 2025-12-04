@@ -139,6 +139,19 @@ public class OrderGenerator : MonoBehaviour
     /// <summary>
     /// Get the difficulty name for a given day index
     /// </summary>
+    /// <summary>
+    /// Get the difficulty SO for a given day index
+    /// </summary>
+    public OrderDifficultySO GetDifficultyForDay(int dayIndex)
+    {
+        if (difficultyByDay == null || difficultyByDay.Count == 0)
+        {
+            Debug.LogError("[OrderGenerator] No difficulties configured!");
+            return null;
+        }
+        return difficultyByDay[Mathf.Clamp(dayIndex, 0, difficultyByDay.Count - 1)];
+    }
+    
     public string GetDifficultyName(int dayIndex)
     {
         if (difficultyByDay == null || difficultyByDay.Count == 0)
@@ -202,7 +215,12 @@ public class OrderGenerator : MonoBehaviour
         };
         
         if (rng.NextDouble() < 0.55 && valid.Any(limbParts.Contains))
-            return limbParts.First(p => valid.Contains(p));
+        {
+            // Filter to only limb parts that are valid for this species, then randomly pick one
+            var validLimbParts = limbParts.Where(p => valid.Contains(p)).ToList();
+            if (validLimbParts.Count > 0)
+                return validLimbParts[rng.Next(validLimbParts.Count)];
+        }
         
         return valid[rng.Next(valid.Count)];
     }
